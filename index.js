@@ -16,7 +16,7 @@ const server = http.createServer(app);
 const io = socket(server);
 
 const chess = new Chess();
-let players = {};
+let player = {};
 let currentPlayer = "W";
 
 app.set("view engine", "ejs");
@@ -25,8 +25,51 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
-  console.log(`rendering index view`);
   res.render("index", { title: "Welcome to Chess Dashboard" });
+});
+
+//whenever any user connected
+io.on("connection", (socket) => {
+  console.log(`New connection establish`);
+
+  if (!player.white) {
+    player.white = socket.id;
+    socket.emit("PlayerRole", "W");
+  } else if (!player.black) {
+    player.black = socket.id;
+    socket.emit("PlayerRole", "B");
+  } else {
+    socket.emit("SpectatorRole");
+  }
+
+  socket.on("disconnect", () => {
+    if (socket.id === player.white) {
+      delete player.white;
+    } else if (socket.id === player.black) {
+      delete player.black;
+    }
+  });
+
+  socket.on("move", (move) => {
+    try {
+      if (chess.turn() === "W" && socket.id !== player.white) return;
+      if (chess.turn() === "B" && socket.id !== player.black) return;
+
+      const result = chess.move("move");
+
+      if (result) {
+        currentPlayer = chess.turn();
+        io.emit("move", move);
+        io.emit("boardState", chess.fen);
+      } else {
+        console.log(`Invalid move : ${move}`);
+        socket.emit("InvalidMove", move);
+      }
+    } catch (error) {
+      console.log(error);
+      socket.emit("Invalid Move", move);
+    }
+  });
 });
 
 //starting server at specific port
