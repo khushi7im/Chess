@@ -4,7 +4,6 @@ const socket = require("socket.io");
 const path = require("path");
 const ejs = require("ejs");
 const { Chess } = require("chess.js");
-const { title } = require("process");
 
 // Create Express.js instance
 const app = express();
@@ -17,7 +16,7 @@ const io = socket(server);
 
 const chess = new Chess();
 let player = {};
-let currentPlayer = "W";
+var currentPlayer = "w";
 
 app.set("view engine", "ejs");
 
@@ -34,10 +33,10 @@ io.on("connection", (socket) => {
 
   if (!player.white) {
     player.white = socket.id;
-    socket.emit("PlayerRole", "W");
+    socket.emit("PlayerRole", "w");
   } else if (!player.black) {
     player.black = socket.id;
-    socket.emit("PlayerRole", "B");
+    socket.emit("PlayerRole", "b");
   } else {
     socket.emit("SpectatorRole");
   }
@@ -52,27 +51,26 @@ io.on("connection", (socket) => {
 
   socket.on("move", (move) => {
     try {
-      if (chess.turn() === "W" && socket.id !== player.white) return;
-      if (chess.turn() === "B" && socket.id !== player.black) return;
+      if (chess.turn() === "w" && socket.id !== player.white) return;
+      if (chess.turn() === "b" && socket.id !== player.black) return;
 
       const result = chess.move("move");
 
       if (result) {
         currentPlayer = chess.turn();
         io.emit("move", move);
-        io.emit("boardState", chess.fen);
+        io.emit("boardState", chess.fen());
       } else {
         console.log(`Invalid move : ${move}`);
         socket.emit("InvalidMove", move);
       }
     } catch (error) {
       console.log(error);
-      socket.emit("Invalid Move", move);
     }
   });
 });
 
 //starting server at specific port
-server.listen("3000", (req, res) => {
-  console.log(`Server running on port 3000`);
+server.listen("3002", (req, res) => {
+  console.log(`Server running on port 3002`);
 });
