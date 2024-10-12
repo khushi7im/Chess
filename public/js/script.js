@@ -37,16 +37,24 @@ const renderBoard = () => {
             e.dataTransfer.setData("text/plain", "");
           }
         });
+        squareElement.addEventListener("dragend", (e) => {
+          draggedPiece = null;
+          sourceSquare = null;
+        });
         squareElement.appendChild(pieceElement);
       }
+
       squareElement.addEventListener("dragover", (e) => {
         e.preventDefault();
+      });
+      squareElement.addEventListener("drop", (e) => {
+        e.preventDefault();
         if (draggedPiece) {
-          const targetsource = {
+          const targetSource = {
             row: parseInt(squareElement.dataset.row),
             col: parseInt(squareElement.dataset.col),
           };
-          handleMove(sourceSquare, targetsource);
+          handleMove(sourceSquare, targetSource);
         }
       });
       boardElement.appendChild(squareElement);
@@ -66,7 +74,7 @@ const handleMove = (source, target) => {
     promotion: "q",
   };
   socket.emit("move", move);
-  renderBoard();
+  // renderBoard();
 };
 const getPieceUnicode = (piece) => {
   const unicodePieces = {
@@ -80,7 +88,7 @@ const getPieceUnicode = (piece) => {
   return unicodePieces[piece.type] || "";
 };
 
-socket.on("playerRole", (role) => {
+socket.on("PlayerRole", (role) => {
   playerRole = role;
   renderBoard();
   if (role === "b") {
@@ -90,7 +98,7 @@ socket.on("playerRole", (role) => {
   }
 });
 
-socket.on("spectatorRole", () => {
+socket.on("SpectatorRole", () => {
   playerRole = null;
   renderBoard();
 });

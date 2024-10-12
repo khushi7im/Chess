@@ -16,7 +16,6 @@ const io = socket(server);
 
 const chess = new Chess();
 let player = {};
-var currentPlayer = "w";
 
 app.set("view engine", "ejs");
 
@@ -43,8 +42,10 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     if (socket.id === player.white) {
+      console.log(`white player disconnected`);
       delete player.white;
     } else if (socket.id === player.black) {
+      console.log(`Black player disconnected`);
       delete player.black;
     }
   });
@@ -54,15 +55,16 @@ io.on("connection", (socket) => {
       if (chess.turn() === "w" && socket.id !== player.white) return;
       if (chess.turn() === "b" && socket.id !== player.black) return;
 
-      const result = chess.move("move");
+      const result = chess.move(move);
 
       if (result) {
         currentPlayer = chess.turn();
         io.emit("move", move);
+        console.log("move", move);
         io.emit("boardState", chess.fen());
       } else {
         console.log(`Invalid move : ${move}`);
-        socket.emit("InvalidMove", move);
+        // socket.emit("InvalidMove", move);
       }
     } catch (error) {
       console.log(error);

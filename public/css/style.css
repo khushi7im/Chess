@@ -9,7 +9,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  h1 {
+    color: rgb(226, 226, 91);
+  }
 }
+
 .chessBoard {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
@@ -25,6 +30,9 @@
 .piece.black {
   color: rgb(26, 25, 25);
 }
+.flipped {
+  transform: rotate(180deg);
+}
 .square {
   display: flex;
   justify-content: center;
@@ -37,10 +45,9 @@
   background-color: rgb(153, 101, 33);
 }
 .piece {
-  padding: 0px;
+  /* padding: 0px; */
   font-size: 45px;
   cursor: pointer;
-  background-color: "";
 }
 .piece.draggable {
   cursor: grab;
@@ -50,11 +57,14 @@
 }
 
 .flipped .piece {
-  transform: rotate(-180deg);
+  transform: rotate(180deg);
 }
-.flipped .square.light {
-  background-color: #964b00; /* Darker color for flipped light squares */
-}
-.flipped .square.dark {
-  background-color: #999595; /* Lighter color for flipped dark squares */
+@media screen and (max-width: 570px) {
+  h1 {
+    display: none;
+  }
+  .wrapper {
+    justify-content: center;
+    flex-direction: row;
+  }
 }
